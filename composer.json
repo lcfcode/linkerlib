@@ -1,0 +1,17 @@
+{
+  "name": "lcfdev/linkerlib",
+  "description": "主要用于学习。注：授权协议没看过，随便写的一个",
+  "license": "Apache-2.0",
+  "type": "linkerlib",
+  "authors": [
+    {
+      "name": "lcfdev",
+      "email": "lcf@jionx.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "lcfdev/linkerlib-install": "dev-master",
+    "php": ">=7.0"
+  }
+}
