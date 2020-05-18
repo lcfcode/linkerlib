@@ -8,7 +8,7 @@ namespace swap\core;
 
 class Db
 {
-    private string $connectDb = 'db';
+    private $connectDb = 'db';
 
     private $writeClient;
     private $readClient;
