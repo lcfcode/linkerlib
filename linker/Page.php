@@ -32,7 +32,6 @@ class Page
         $data = $this->data;
         $all = $this->all;
         $flag === true ? require $layout : require $_content;
-//        require $layout;
     }
 
     /**

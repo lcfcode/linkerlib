@@ -44,7 +44,7 @@ class Linker
     /**
      * @param $whole
      * @param $debugInfo
-     * @throws \Exception
+     * @throws \RuntimeException
      * @author LCF
      * @date 2019/8/17 18:16
      * 页面数据的加工
@@ -59,14 +59,14 @@ class Linker
             (new Page($transfer))->api();
             return;
         }
-        $layoutFile = $views['default.path'] . 'layout' . DIRECTORY_SEPARATOR . 'layout.phtml';
+        $layoutFile = $views['default.path'] . 'Layout' . DIRECTORY_SEPARATOR . 'layout.phtml';
         if ($set['layout'] !== null) {
-            $layoutFile = $views['default.path'] . 'layout' . DIRECTORY_SEPARATOR . $set['layout'] . '.phtml';
+            $layoutFile = $views['default.path'] . 'Layout' . DIRECTORY_SEPARATOR . $set['layout'] . '.phtml';
         }
-        //请求大小写规则跟url规则方法名一样，处理这里控制器对应页面的文件夹第一个字母变小写以外
-        $path = $views['default.path'] . lcfirst($views['default.controller']);
+        //请求大小写规则跟url规则方法名一样
+        $path = $views['default.path'] . $views['default.controller'];
         if ($set['controller'] !== null) {
-            $path = $views['default.path'] . lcfirst($set['controller']);
+            $path = $views['default.path'] . $set['controller'];
         }
         if ($set['page'] !== null) {
             $page = $set['page'];
@@ -75,13 +75,13 @@ class Linker
         }
         $content = $path . DIRECTORY_SEPARATOR . $page . '.phtml';
         if (!is_file($content)) {
-            throw new \Exception($content . ':view is not found', 500);
+            throw new \RuntimeException($content . ':view is not found', 500);
         }
         $v = $debugInfo['debug'] === true ? date('YmdHis') : date('YmdHis', filemtime($content));
         $pageObj = new Page($transfer, $v);
         if ($set['head'] === true) {
             if (!is_file($layoutFile)) {
-                throw new \Exception($layoutFile . ':view is not found', 500);
+                throw new \RuntimeException($layoutFile . ':view is not found', 500);
             }
             $pageObj->views($content, $layoutFile);
         } else {
