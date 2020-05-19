@@ -9,19 +9,61 @@ namespace swap\core;
 abstract class Dao
 {
     private $tabName;
-    private $tabId;
-    private $tabField;
 
     private $writeClient;
     private $readClient;
 
     /**
+     * @return string
+     * @author LCF
+     * @date
+     * 设置链接
+     */
+    public function setConnect()
+    {
+        return 'db';
+    }
+
+    /**
+     * @return false|string
+     * @author LCF
+     * @date
+     * 表名处理
+     */
+    public function tabName()
+    {
+        if ($this->tabName) {
+            return $this->tabName;
+        }
+        $name = str_replace('\\', '/', static::class);
+        $name = basename($name);
+        $newName = strtolower(trim(preg_replace("/[A-Z]/", "_\\0", $name), '_'));
+        $this->tabName = substr($newName, 0, strrpos($newName, '_dao'));
+        return $this->tabName;
+    }
+
+
+    /**
+     * @return string
+     * @author LCF
+     * @date
+     * 默认主键字段
+     */
+    public function defaultId()
+    {
+        return 'id';
+    }
+
+    /**
      * @return array
      * @author LCF
      * @date
-     * 抽象方法，用于返回表名，默认主键名和字段；表名必须返回，其他选填
+     * 表字段
      */
-    abstract public function connectInfo(): array;
+    public function fieldArr()
+    {
+        return ['*'];
+    }
 
     /**
      * @param bool $flag
@@ -31,16 +73,8 @@ abstract class Dao
      */
     private function connect($flag = true)
     {
-        $result = $this->connectInfo();
-        if (!isset($result['table'])) {
-            trigger_error('connectInfo function return data err!', E_USER_ERROR);
-        }
-        $this->tabName = $result['table'];
-        $this->tabId = isset($result['default_id']) ? $result['default_id'] : 'id';
-        $this->tabField = isset($result['field']) ? $result['field'] : ['*'];
-        $dbKey = isset($result['db']) ? $result['db'] : 'db';
         $application = \RegTree::get('app.application');
-        $config = $application->config()['global.config'][$dbKey];
+        $config = $application->config()['global.config'][$this->setConnect()];
         $separate = isset($config['separate']) ? $config['separate'] : false;
         if (true === $separate) {
             $this->readClient = $application->dbInstance($config['read_db'], 'linker_read');
@@ -109,52 +143,52 @@ abstract class Dao
 
     public function insert($data)
     {
-        return $this->writeClient()->insert($this->tabName, $data);
+        return $this->writeClient()->insert($this->tabName(), $data);
     }
 
     public function updateId($id, $data)
     {
-        return $this->writeClient()->updateId($this->tabName, $this->tabId, $id, $data);
+        return $this->writeClient()->updateId($this->tabName(), $this->defaultId(), $id, $data);
     }
 
     public function deleteId($id)
     {
-        return $this->writeClient()->deleteId($this->tabName, $this->tabId, $id);
+        return $this->writeClient()->deleteId($this->tabName(), $this->defaultId(), $id);
     }
 
     public function update($data, $where)
     {
-        return $this->writeClient()->update($this->tabName, $data, $where);
+        return $this->writeClient()->update($this->tabName(), $data, $where);
     }
 
     public function delete($where)
     {
-        return $this->writeClient()->delete($this->tabName, $where);
+        return $this->writeClient()->delete($this->tabName(), $where);
     }
 
     public function selectId($id)
     {
-        return $this->readClient()->selectId($this->tabName, $this->tabId, $id, $this->tabField);
+        return $this->readClient()->selectId($this->tabName(), $this->defaultId(), $id, $this->fieldArr());
     }
 
     public function selectOne($where, $order = [])
     {
-        return $this->readClient()->selectOne($this->tabName, $where, $order, $this->tabField);
+        return $this->readClient()->selectOne($this->tabName(), $where, $order, $this->fieldArr());
     }
 
     public function selectAll($order = [], $offset = 0, $fetchNum = 0)
     {
-        return $this->readClient()->selectAll($this->tabName, $order, $offset, $fetchNum, $this->tabField);
+        return $this->readClient()->selectAll($this->tabName(), $order, $offset, $fetchNum, $this->fieldArr());
     }
 
     public function selects($where = [], $order = [], $offset = 0, $fetchNum = 0)
     {
-        return $this->readClient()->selects($this->tabName, $where, $order, $offset, $fetchNum, $this->tabField);
+        return $this->readClient()->selects($this->tabName(), $where, $order, $offset, $fetchNum, $this->fieldArr());
     }
 
     public function selectIn($field, $inWhere, $where = [], $order = [], $offset = 0, $fetchNum = 0)
     {
-        return $this->readClient()->selectIn($this->tabName, $field, $inWhere, $where, $order, $offset, $fetchNum, $this->tabField);
+        return $this->readClient()->selectIn($this->tabName(), $field, $inWhere, $where, $order, $offset, $fetchNum, $this->fieldArr());
     }
 
     public function query($sql, $param = [])
@@ -167,37 +201,37 @@ abstract class Dao
 
     public function like($stringName, $content, $where = [], $isCount = false, $order = [], $offset = 0, $fetchNum = 0, $direction = 'in')
     {
-        return $this->readClient()->like($this->tabName, $stringName, $content, $where, $isCount, $order, $offset, $fetchNum, $direction, $this->tabField);
+        return $this->readClient()->like($this->tabName(), $stringName, $content, $where, $isCount, $order, $offset, $fetchNum, $direction, $this->fieldArr());
     }
 
     public function count($where = [], $columnName = '*', $distinct = false)
     {
-        return $this->readClient()->count($this->tabName, $where, $columnName, $distinct);
+        return $this->readClient()->count($this->tabName(), $where, $columnName, $distinct);
     }
 
     public function min($columnName, $where = [])
     {
-        return $this->readClient()->min($this->tabName, $columnName, $where);
+        return $this->readClient()->min($this->tabName(), $columnName, $where);
     }
 
     public function max($columnName, $where = [])
     {
-        return $this->readClient()->max($this->tabName, $columnName, $where);
+        return $this->readClient()->max($this->tabName(), $columnName, $where);
     }
 
     public function avg($columnName, $where = [])
     {
-        return $this->readClient()->avg($this->tabName, $columnName, $where);
+        return $this->readClient()->avg($this->tabName(), $columnName, $where);
     }
 
     public function sum($columnName, $where = [])
     {
-        return $this->readClient()->sum($this->tabName, $columnName, $where);
+        return $this->readClient()->sum($this->tabName(), $columnName, $where);
     }
 
     public function insertMultiple($multipleInsertData, $keys = [])
     {
-        return $this->writeClient()->insertMultiple($this->tabName, $multipleInsertData, $keys);
+        return $this->writeClient()->insertMultiple($this->tabName(), $multipleInsertData, $keys);
     }
 
     public function beginTransaction()
