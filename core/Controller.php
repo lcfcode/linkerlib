@@ -15,7 +15,7 @@ abstract class Controller
     /**
      * @param $key
      * @param string $default
-     * @return string
+     * @return string|array
      * @author LCF
      * @date 2019/8/17 18:25
      * 获取 $_GET 参数
@@ -34,7 +34,7 @@ abstract class Controller
     /**
      * @param $key
      * @param string $default
-     * @return string
+     * @return string|array
      * @author LCF
      * @date 2019/8/17 18:25
      * 获取 $_POST 参数
@@ -53,7 +53,7 @@ abstract class Controller
     /**
      * @param $key
      * @param string $default
-     * @return string
+     * @return string|array
      * @author LCF
      * @date 2020/4/30 17:11
      * 获取 $_REQUEST 参数
@@ -72,7 +72,7 @@ abstract class Controller
     /**
      * @param $key
      * @param string $default
-     * @return string
+     * @return string|array
      * @author LCF
      * @date 2020/4/30 17:11
      * 获取 $_FILES 参数
