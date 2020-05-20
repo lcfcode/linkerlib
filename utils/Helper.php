@@ -63,7 +63,7 @@ class Helper
      * @date 2020/4/30 17:07
      * 获取 utils 类的方法
      */
-    public static function util($name = 'AllUtil')
+    public static function utils($name = 'AllUtil')
     {
         return self::getApp()->getUtils($name);
     }
