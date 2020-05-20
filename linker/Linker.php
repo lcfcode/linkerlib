@@ -23,7 +23,6 @@ class Linker
         $className = $config['app.path'] . '\\' . $module . '\\controller\\' . $controller . 'Controller';
         $functionName = $action . 'Action';
         $moduleObj = new $className();
-        \RegTree::set('contr.application', $moduleObj);
         $whole['before'] = $moduleObj->beforeRequest();
         $context = $moduleObj->$functionName();
         $whole['after'] = $moduleObj->afterRequest();
