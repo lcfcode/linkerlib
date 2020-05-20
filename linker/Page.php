@@ -8,14 +8,18 @@ namespace swap\linker;
 
 class Page
 {
-    public $data;
-    public $all;
-    public $version;
+    private $data;
+    private $all;
+    private $version;
+    private $_content;
+    private $_layout;
 
-    public function __construct($transfer, $version = 1)
+    public function __construct($transfer, $content = '', $layout = '', $version = 1)
     {
         $this->data = $transfer['data'];
         $this->all = $transfer;
+        $this->_content = $content;
+        $this->_layout = $layout;
         $this->version = $version;
     }
 
@@ -27,11 +31,11 @@ class Page
      * @date
      * 处理页面的
      */
-    public function views($_content, $layout, $flag = true)
+    public function views($flag = true)
     {
         $data = $this->data;
         $all = $this->all;
-        $flag === true ? require $layout : require $_content;
+        $flag === true ? require $this->_layout : require $this->_content;
     }
 
     /**

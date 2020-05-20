@@ -78,15 +78,16 @@ class Linker
             throw new \RuntimeException($content . ':view is not found', 500);
         }
         $v = $debugInfo['debug'] === true ? date('YmdHis') : date('YmdHis', filemtime($content));
-        $pageObj = new Page($transfer, $v);
+
         if ($set['head'] === true) {
             if (!is_file($layoutFile)) {
                 throw new \RuntimeException($layoutFile . ':view is not found', 500);
             }
-            $pageObj->views($content, $layoutFile);
         } else {
-            $pageObj->views($content, $layoutFile, $set['head']);
+            $layoutFile = '';
         }
+        $pageObj = new Page($transfer, $content, $layoutFile, $v);
+        $pageObj->views($set['head']);
         $this->debugs($debugInfo);
     }
 
