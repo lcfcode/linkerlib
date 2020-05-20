@@ -9,12 +9,13 @@ namespace swap\core;
 trait Utiltrait
 {
     /**
+     * @param string $name
      * @return \swap\utils\AllUtil
      * @author LCF
      * @date
      * 获取工具方法
      */
-    public function util($name = 'AllUtil')
+    public function utils($name = 'AllUtil')
     {
         return $this->app()->getUtils($name);
     }
@@ -40,12 +41,12 @@ trait Utiltrait
      */
     public function getConfigValue($configKey, $default = null)
     {
-        return $this->util()->getConfigValue($configKey, $default);
+        return $this->utils()->getConfigValue($configKey, $default);
     }
 
     public function passwordEncrypt($pwd)
     {
-        return $this->util()->passwordEncrypt($pwd);
+        return $this->utils()->passwordEncrypt($pwd);
     }
 
     /**
@@ -57,7 +58,7 @@ trait Utiltrait
      */
     public function passwordHash($pwd)
     {
-        return $this->util()->passwordHash($pwd);
+        return $this->utils()->passwordHash($pwd);
     }
 
     /**
@@ -70,7 +71,7 @@ trait Utiltrait
      */
     public function passwordVerify($pwd, $hash)
     {
-        return $this->util()->passwordVerify($pwd, $hash);
+        return $this->utils()->passwordVerify($pwd, $hash);
     }
 
     /**
@@ -93,7 +94,7 @@ trait Utiltrait
      */
     public function uuid()
     {
-        return $this->util()->getUuid();
+        return $this->utils()->getUuid();
     }
 
     /**
@@ -106,7 +107,7 @@ trait Utiltrait
      */
     public function logs($context, $content = null)
     {
-        $this->util()->logs($context, $content);
+        $this->utils()->logs($context, $content);
         return $this;
     }
 
@@ -120,7 +121,7 @@ trait Utiltrait
      */
     public function catchLog($e, $name = '')
     {
-        $this->util()->catchLog($e, $name);
+        $this->utils()->catchLog($e, $name);
         return $this;
     }
 
@@ -133,7 +134,7 @@ trait Utiltrait
      */
     public function getRedis($config = [])
     {
-        return $this->util()->getRedis($config);
+        return $this->utils()->getRedis($config);
     }
 
     /**
@@ -144,6 +145,6 @@ trait Utiltrait
      */
     public function root()
     {
-        return $this->util()->root();
+        return $this->utils()->root();
     }
 }

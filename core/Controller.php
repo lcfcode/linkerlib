@@ -22,7 +22,7 @@ abstract class Controller
      */
     public function get($key = '', $default = '')
     {
-        return $this->util()->get($key, $default);
+        return $this->utils()->get($key, $default);
     }
 
     /**
@@ -35,7 +35,7 @@ abstract class Controller
      */
     public function post($key = '', $default = '')
     {
-        return $this->util()->post($key, $default);
+        return $this->utils()->post($key, $default);
     }
 
     /**
@@ -48,7 +48,7 @@ abstract class Controller
      */
     public function param($key = '', $default = '')
     {
-        return $this->util()->param($key, $default);
+        return $this->utils()->param($key, $default);
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class Controller
      */
     public function file($key = '', $default = '')
     {
-        return $this->util()->file($key, $default);
+        return $this->utils()->file($key, $default);
     }
 
     /**
@@ -72,7 +72,7 @@ abstract class Controller
      */
     public function isPost()
     {
-        return $this->util()->isPost();
+        return $this->utils()->isPost();
     }
 
     /**
