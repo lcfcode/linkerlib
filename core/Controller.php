@@ -18,7 +18,7 @@ abstract class Controller
      * @return string
      * @author LCF
      * @date 2019/8/17 18:25
-     * 获取get参数
+     * 获取 $_GET 参数
      */
     public function get($key = '', $default = '')
     {
@@ -37,7 +37,7 @@ abstract class Controller
      * @return string
      * @author LCF
      * @date 2019/8/17 18:25
-     * 获取post参数
+     * 获取 $_POST 参数
      */
     public function post($key = '', $default = '')
     {
@@ -56,7 +56,7 @@ abstract class Controller
      * @return string
      * @author LCF
      * @date 2020/4/30 17:11
-     * 获取$_REQUEST参数
+     * 获取 $_REQUEST 参数
      */
     public function param($key = '', $default = '')
     {
@@ -65,6 +65,25 @@ abstract class Controller
         }
         if (isset($_REQUEST[$key])) {
             return trim($_REQUEST[$key]);
+        }
+        return $default;
+    }
+
+    /**
+     * @param $key
+     * @param string $default
+     * @return string
+     * @author LCF
+     * @date 2020/4/30 17:11
+     * 获取 $_FILES 参数
+     */
+    public function file($key = '', $default = '')
+    {
+        if (empty($key)) {
+            return $_FILES;
+        }
+        if (isset($_FILES[$key])) {
+            return trim($_FILES[$key]);
         }
         return $default;
     }

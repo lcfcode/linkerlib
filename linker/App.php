@@ -13,8 +13,8 @@ class App
      * 可以配置的入口配置
      */
     private $setConfig = [
-        'app_path' => 'app',//应用目录
         'err_obj' => null,//异常处理类 已经实例化过的
+        'bind_app' => null,//绑定的模块
     ];
     private $config;
     private $objects = [];
@@ -26,10 +26,10 @@ class App
      */
     public function __construct($env = 'dev', $set = [])
     {
-        $setConfig = array_merge($this->setConfig, $set);
+        $this->setConfig = array_merge($this->setConfig, $set);
         $config = [
             'root.path' => \RegTree::root(),
-            'app.path' => $setConfig['app_path'],
+            'app.path' => 'app',
             'run.env' => $env,
             'global.config' => $this->globalConfig($env . '.php'),
         ];
@@ -37,7 +37,7 @@ class App
         $config['global.config']['debug'] = $debug;
         $logsPath = $config['global.config']['logs'];
         $config['run.logs.path'] = $logsPath;
-        $this->handleException($debug, $logsPath, $setConfig['err_obj']);
+        $this->handleException($debug, $logsPath, $this->setConfig['err_obj']);
         $this->config = $this->route($config);
         $this->run();
     }
@@ -93,25 +93,18 @@ class App
             $action = $route['action'];
         } else {
             $routeArr = explode('/', trim($uri, '/'));
-            switch (count($routeArr)) {
-                case 1:
-                    $module = $routeArr[0];
-                    $controller = $route['controller'];
-                    $action = $route['action'];
-                    break;
-                case 2:
-                    $module = $routeArr[0];
-                    $controller = $routeArr[1];
-                    $action = $route['action'];
-                    break;
-                default:
-                    $module = $routeArr[0];
-                    $controller = $routeArr[1];
-                    $action = $routeArr[2];
-                    break;
+            if ($this->setConfig['bind_app']) {
+                $module = $this->setConfig['bind_app'];
+                $controller = isset($routeArr[0]) ? $routeArr[0] : $route['controller'];
+                $action = isset($routeArr[1]) ? $routeArr[1] : $route['action'];
+            } else {
+                $module = isset($routeArr[0]) ? $routeArr[0] : $route['module'];
+                $controller = isset($routeArr[1]) ? $routeArr[1] : $route['controller'];
+                $action = isset($routeArr[2]) ? $routeArr[2] : $route['action'];
             }
         }
         $controller = ucfirst($controller);//请求重第一个字母为小写将它转为大写，类文件默认大写开头
+        $config['request.bind'] = $this->setConfig['bind_app'];
         $config['request.module'] = $module;
         $config['request.log.file'] = $module . '-' . $controller . '-' . $action;
         $config['request.route'] = ['module' => $module, 'controller' => $controller, 'action' => $action];
