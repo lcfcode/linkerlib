@@ -58,29 +58,14 @@ class Helper
 
     /**
      * @param string $name
-     * @return \swap\utils\Utils
+     * @return \swap\utils\AllUtil
      * @author LCF
      * @date 2020/4/30 17:07
      * 获取 utils 类的方法
      */
-    public static function utils($name = 'Utils')
+    public static function util($name = 'AllUtil')
     {
         return self::getApp()->getUtils($name);
     }
 
-    /**
-     * @return \swap\core\Controller
-     * @author LCF
-     * @date 2020/4/30 17:25
-     */
-    public static function that()
-    {
-        return \RegTree::get('contr.application');
-    }
-
-    public static function getUrl()
-    {
-        $config = self::config(true);
-        return '/' . $config['request.route']['module'] . '/' . $config['request.route']['controller'] . '/' . $config['request.route']['action'];
-    }
 }

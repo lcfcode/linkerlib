@@ -22,13 +22,7 @@ abstract class Controller
      */
     public function get($key = '', $default = '')
     {
-        if (empty($key)) {
-            return $_GET;
-        }
-        if (isset($_GET[$key])) {
-            return trim($_GET[$key]);
-        }
-        return $default;
+        return $this->util()->get($key, $default);
     }
 
     /**
@@ -41,13 +35,7 @@ abstract class Controller
      */
     public function post($key = '', $default = '')
     {
-        if (empty($key)) {
-            return $_POST;
-        }
-        if (isset($_POST[$key])) {
-            return trim($_POST[$key]);
-        }
-        return $default;
+        return $this->util()->post($key, $default);
     }
 
     /**
@@ -60,13 +48,7 @@ abstract class Controller
      */
     public function param($key = '', $default = '')
     {
-        if (empty($key)) {
-            return $_REQUEST;
-        }
-        if (isset($_REQUEST[$key])) {
-            return trim($_REQUEST[$key]);
-        }
-        return $default;
+        return $this->util()->param($key, $default);
     }
 
     /**
@@ -79,13 +61,7 @@ abstract class Controller
      */
     public function file($key = '', $default = '')
     {
-        if (empty($key)) {
-            return $_FILES;
-        }
-        if (isset($_FILES[$key])) {
-            return trim($_FILES[$key]);
-        }
-        return $default;
+        return $this->util()->file($key, $default);
     }
 
     /**
@@ -96,10 +72,7 @@ abstract class Controller
      */
     public function isPost()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            return true;
-        }
-        return false;
+        return $this->util()->isPost();
     }
 
     /**

@@ -3,10 +3,155 @@
  * @link https://gitee.com/lcfcode/linker
  * @link https://github.com/lcfcode/linker
  */
+
 namespace swap\utils;
 
-class Utils
+class AllUtil
 {
+    /**
+     * @return \swap\linker\App
+     * @author LCF
+     * @date
+     */
+    public function app()
+    {
+        return \RegTree::get('app.application');
+    }
+
+    /**
+     * @return mixed
+     * @author LCF
+     * @date
+     * 全局配置
+     */
+    public function config()
+    {
+        return $this->app()->config();
+    }
+
+    /**
+     * @param $configKey
+     * @param null $default
+     * @return null
+     * @author LCF
+     * @date 2019/8/17 18:32
+     * 获取配置的方法
+     */
+    public function getConfigValue($configKey, $default = null)
+    {
+        $config = $this->app()->getModuleConfig();
+        if (isset($config[$configKey])) {
+            return $config[$configKey];
+        }
+        $globalConfig = $this->config()['global.config'];
+        if ($globalConfig[$configKey]) {
+            return $globalConfig[$configKey];
+        }
+        return $default;
+    }
+
+    /**
+     * @param $pwd
+     * @return string
+     * @author LCF
+     * @date
+     * 不常用的密码处理
+     */
+    public function passwordEncrypt($pwd)
+    {
+        return strtolower(md5(substr(md5($pwd), 0, -3)));
+    }
+
+    /**
+     * @param $pwd
+     * @return bool|string
+     * @author LCF
+     * @date 2019/8/17 21:02
+     * 哈希密码加密
+     */
+    public function passwordHash($pwd)
+    {
+        $password = $this->passwordEncrypt($pwd);
+        return password_hash($password, PASSWORD_BCRYPT);
+    }
+
+    /**
+     * @param $pwd
+     * @param $hash
+     * @return bool
+     * @author LCF
+     * @date 2019/8/17 21:01
+     * 哈希密码验证
+     */
+    public function passwordVerify($pwd, $hash)
+    {
+        $password = $this->passwordEncrypt($pwd);
+        return password_verify($password, $hash);
+    }
+
+    /**
+     * @param $context
+     * @param null $content
+     * @return bool|int
+     * @author LCF
+     * @date
+     * 日常日志操作处理
+     */
+    public function logs($context, $content = null)
+    {
+        return $this->log($this->config()['run.logs.path'], $this->config()['request.log.file'], $context, $content);
+    }
+
+    /**
+     * @param $e
+     * @param string $name
+     * @return bool|int
+     * @author LCF
+     * @date
+     * 异常日志函数
+     */
+    public function catchLog($e, $name = '')
+    {
+        if ($name) {
+            $file = $name;
+        } else {
+            $file = $this->config()['request.log.file'] . 'Action-exception';
+        }
+        $str = '异常,信息如下：' . PHP_EOL;
+        $str .= '    异常文件 : ' . $e->getFile() . PHP_EOL;
+        $str .= '    异常行数 : ' . $e->getLine() . PHP_EOL;
+        $str .= '    异常代码 : ' . $e->getCode() . PHP_EOL;
+        $str .= '    异常信息 : ' . $e->getMessage() . PHP_EOL;
+        $str .= '    异常数组 : ' . json_encode($e->getTrace(), JSON_UNESCAPED_UNICODE) . PHP_EOL;
+        return $this->log($this->config()['run.logs.path'], $file, $str);
+    }
+
+    /**
+     * @param array $config
+     * @return \redis
+     * @user LCF
+     * @date 2019/3/15 22:27
+     * 获取redis
+     */
+    public function getRedis($config = [])
+    {
+        if (empty($config)) {
+            $config = $this->config()['global.config']['redis'];
+        }
+        return $this->app()->getUtils('RedisClass')->connect($config);
+    }
+
+    /**
+     * @return mixed
+     * @author LCF
+     * @date 2019/8/17 18:35
+     * 根目录
+     */
+    public function root()
+    {
+        return $this->config()['root.path'];
+    }
+
     /**
      * @param $cookieKey
      * @return bool
@@ -133,7 +278,6 @@ class Utils
      */
     public function getUuid($prefix = null)
     {
-        //return strtolower(md5(uniqid($prefix . mt_rand(), true)));
         return strtolower(md5(uniqid($prefix . php_uname('n') . mt_rand(), true)));
     }
 
@@ -147,7 +291,7 @@ class Utils
      * @date 2019/3/13 14:30
      * 日志记录
      */
-    public function logs($dir, $file, $info, $content = null)
+    public function log($dir, $file, $info, $content = null)
     {
         $dir = rtrim($dir, "/\\");
         $dir = $dir . DIRECTORY_SEPARATOR . date('Ym') . DIRECTORY_SEPARATOR . date('d');
@@ -295,4 +439,95 @@ class Utils
         }
         return ['status' => false, 'content' => json_encode(["error" => $error, "url" => $url]), 'code' => $aStatus ["http_code"],];
     }
+
+    /**
+     * @param $key
+     * @param string $default
+     * @return string|array
+     * @author LCF
+     * @date 2019/8/17 18:25
+     * 获取 $_GET 参数
+     */
+    public function get($key = '', $default = '')
+    {
+        if (empty($key)) {
+            return $_GET;
+        }
+        if (isset($_GET[$key])) {
+            return trim($_GET[$key]);
+        }
+        return $default;
+    }
+
+    /**
+     * @param $key
+     * @param string $default
+     * @return string|array
+     * @author LCF
+     * @date 2019/8/17 18:25
+     * 获取 $_POST 参数
+     */
+    public function post($key = '', $default = '')
+    {
+        if (empty($key)) {
+            return $_POST;
+        }
+        if (isset($_POST[$key])) {
+            return trim($_POST[$key]);
+        }
+        return $default;
+    }
+
+    /**
+     * @param $key
+     * @param string $default
+     * @return string|array
+     * @author LCF
+     * @date 2020/4/30 17:11
+     * 获取 $_REQUEST 参数
+     */
+    public function param($key = '', $default = '')
+    {
+        if (empty($key)) {
+            return $_REQUEST;
+        }
+        if (isset($_REQUEST[$key])) {
+            return trim($_REQUEST[$key]);
+        }
+        return $default;
+    }
+
+    /**
+     * @param $key
+     * @param string $default
+     * @return string|array
+     * @author LCF
+     * @date 2020/4/30 17:11
+     * 获取 $_FILES 参数
+     */
+    public function file($key = '', $default = '')
+    {
+        if (empty($key)) {
+            return $_FILES;
+        }
+        if (isset($_FILES[$key])) {
+            return trim($_FILES[$key]);
+        }
+        return $default;
+    }
+
+    /**
+     * @return bool
+     * @author LCF
+     * @date 2019/8/17 18:25
+     * 判断请求方式是否是post
+     */
+    public function isPost()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            return true;
+        }
+        return false;
+    }
+
 }
