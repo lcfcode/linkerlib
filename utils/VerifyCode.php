@@ -55,7 +55,6 @@ class VerifyCode
         if ($height == 0) {
             $height = floor($width / 3);
         }
-//        p($height);die;
         $img = imagecreate($width, $height);
         imagecolorallocate($img, 255, 255, 255);
         $pointNum = $width * 2;
