@@ -56,7 +56,7 @@ class RegTree
         if (isset(self::$objects[$alias])) {
             return self::$objects[$alias];
         }
-        return false;
+        throw new \RuntimeException('没有找到对应的实例', 500);
     }
 
     public static function _unset($alias)
