@@ -32,6 +32,17 @@ trait Utiltrait
     }
 
     /**
+     * @return mixed
+     * @author LCF
+     * @date
+     * 获取配置
+     */
+    public function config()
+    {
+        return $this->app()->config();
+    }
+
+    /**
      * @param $configKey
      * @param null $default
      * @return null
