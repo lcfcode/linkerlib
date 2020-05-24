@@ -8,6 +8,8 @@ namespace swap\core;
 
 class Db
 {
+    use Utiltrait;
+
     private $connectDb = 'db';
 
     private $writeClient;

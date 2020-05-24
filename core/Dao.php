@@ -8,6 +8,8 @@ namespace swap\core;
 
 abstract class Dao
 {
+    use Utiltrait;
+
     private $tabName;
 
     private $writeClient;
