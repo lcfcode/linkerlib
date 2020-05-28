@@ -92,14 +92,16 @@ class AllUtil
     /**
      * @param $context
      * @param null $content
+     * @param string $file
      * @return bool|int
      * @author LCF
      * @date
      * 日常日志操作处理
      */
-    public function logs($context, $content = null)
+    public function logs($context, $content = null, $file = '')
     {
-        return $this->log($this->config()['run.logs.path'], $this->config()['request.log.file'], $context, $content);
+        $file = $file ? $file : $this->config()['request.log.file'];
+        return $this->log($this->config()['run.logs.path'], $file, $context, $content);
     }
 
     /**
@@ -112,18 +114,15 @@ class AllUtil
      */
     public function catchLog($e, $name = '')
     {
-        if ($name) {
-            $file = $name;
-        } else {
-            $file = $this->config()['request.log.file'] . 'Action-exception';
-        }
-        $str = '异常,信息如下：' . PHP_EOL;
-        $str .= '    异常文件 : ' . $e->getFile() . PHP_EOL;
-        $str .= '    异常行数 : ' . $e->getLine() . PHP_EOL;
-        $str .= '    异常代码 : ' . $e->getCode() . PHP_EOL;
-        $str .= '    异常信息 : ' . $e->getMessage() . PHP_EOL;
-        $str .= '    异常数组 : ' . json_encode($e->getTrace(), JSON_UNESCAPED_UNICODE) . PHP_EOL;
-        return $this->log($this->config()['run.logs.path'], $file, $str);
+        $file = $name ? $name : $this->config()['request.log.file'] . 'Action-exception';
+        $log['异常,信息如下'] = [
+            '异常文件' => $e->getFile(),
+            '异常行数' => $e->getLine(),
+            '异常代码' => $e->getCode(),
+            '异常信息' => $e->getMessage(),
+            '异常数组' => $e->getTrace(),
+        ];
+        return $this->log($this->config()['run.logs.path'], $file, $log);
     }
 
     /**

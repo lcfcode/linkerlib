@@ -111,14 +111,15 @@ trait Utiltrait
     /**
      * @param $context
      * @param null $content
+     * @param string $file
      * @return $this
      * @author LCF
      * @date 2019/8/17 18:33
      * 日志操作函数
      */
-    public function logs($context, $content = null)
+    public function logs($context, $content = null, $file = '')
     {
-        $this->utils()->logs($context, $content);
+        $this->utils()->logs($context, $content, $file);
         return $this;
     }
 
