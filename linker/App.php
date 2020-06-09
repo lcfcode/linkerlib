@@ -8,55 +8,53 @@ namespace swap\linker;
 
 class App
 {
-    /**
-     * @var array
-     * 可以配置的入口配置
-     */
-    private $setConfig = [
-        'err_obj' => null,//异常处理类 已经实例化过的
-        'bind_app' => null,//绑定的模块
-    ];
     private $config;
     private $objects = [];
 
     /**
      * Linker constructor.
      * @param string $env 全局配置文件
-     * @param array $set 设置的配置，支持 $this->setConfig内的列表
+     * @param null $bindApp
      */
-    public function __construct($env = 'dev', $set = [])
+    public function __construct($env = 'dev', $bindApp = null)
     {
-        $this->setConfig = array_merge($this->setConfig, $set);
         $config = [
             'root.path' => \RegTree::root(),
             'app.path' => 'app',
             'run.env' => $env,
             'global.config' => $this->globalConfig($env . '.php'),
         ];
-        $debug = $config['run.env'] == 'dev' ? true : false;
-        $config['global.config']['debug'] = $debug;
-        $logsPath = $config['global.config']['logs'];
-        $config['run.logs.path'] = $logsPath;
-        $this->handleException($debug, $logsPath, $this->setConfig['err_obj']);
-        $this->config = $this->route($config);
+        $config['run.debug'] = $env == 'dev' ? true : false;
+        $config['run.logs.path'] = $config['root.path'] . $config['global.config']['logs'];
+        $config['request.bind'] = $bindApp;
+
+        $this->handleException($config);
+        $requestConf = $this->route($config['global.config']['default_route'], $bindApp);
+        $this->config = array_merge($config, $requestConf);
+        unset($config, $requestConf);
         $this->run();
     }
 
     /**
-     * @param $debug
-     * @param $logPath
-     * @param $error
+     * @param $config
      * @author LCF
      * @date 2019/8/17 18:07
      * 异常处理操作
      */
-    private function handleException($debug, $logPath, $error)
+    private function handleException($config)
     {
-        if (!($error instanceof Error)) {
+        if (true === $config['run.debug'] && isset($config['global.config']['err_obj']) && class_exists($config['global.config']['err_obj'])) {
+            $errClass = $config['global.config']['err_obj'];
+            $error = new $errClass();
+            if (!($error instanceof Error)) {
+                unset($error);
+                $error = new Error();
+            }
+        } else {
             $error = new Error();
         }
-        $error->init($logPath);
-        $error->render($debug);
+        $error->init($config['run.logs.path']);
+        $error->render($config['run.debug']);
     }
 
     /**
@@ -71,13 +69,13 @@ class App
     }
 
     /**
-     * @param $config
-     * @return mixed
-     * @author LCF
+     * @param $route
+     * @param $bindApp
+     * @return array
      * @date 2019/8/17 18:13
      * 路由处理
      */
-    private function route($config)
+    private function route($route, $bindApp)
     {
         $requestUrl = $_SERVER['REQUEST_URI'];
         $index = strpos($requestUrl, '?');
@@ -86,15 +84,14 @@ class App
             $uri = str_replace('index.php', '', $uri);
         }
         $uri = trim($uri, '/');
-        $route = $config['global.config']['default_route'];
         if (empty($uri)) {
             $module = $route['module'];
             $controller = $route['controller'];
             $action = $route['action'];
         } else {
             $routeArr = explode('/', trim($uri, '/'));
-            if ($this->setConfig['bind_app']) {
-                $module = $this->setConfig['bind_app'];
+            if ($bindApp) {
+                $module = $bindApp;
                 $controller = isset($routeArr[0]) ? $routeArr[0] : $route['controller'];
                 $action = isset($routeArr[1]) ? $routeArr[1] : $route['action'];
             } else {
@@ -104,7 +101,6 @@ class App
             }
         }
         $controller = ucfirst($controller);//请求重第一个字母为小写将它转为大写，类文件默认大写开头
-        $config['request.bind'] = $this->setConfig['bind_app'];
         $config['request.module'] = $module;
         $config['request.log.file'] = $module . '-' . $controller . '-' . $action;
         $config['request.route'] = ['module' => $module, 'controller' => $controller, 'action' => $action];
@@ -118,7 +114,7 @@ class App
      */
     public function run()
     {
-        $debugInfo = ['debug' => $this->config()['global.config']['debug'], 'start_time' => $_SERVER['REQUEST_TIME_FLOAT'], 'start_memory' => memory_get_usage()];
+        $debugInfo = ['debug' => $this->config()['run.debug'], 'start_time' => $_SERVER['REQUEST_TIME_FLOAT'], 'start_memory' => memory_get_usage()];
         $linker = new Linker();
         //写入配置文件
         \RegTree::set('app.application', $this);
