@@ -4,7 +4,7 @@
  * @link https://github.com/lcfcode/linker
  */
 
-namespace swap\linker;
+namespace swap\core;
 
 class View
 {

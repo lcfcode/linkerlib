@@ -9,7 +9,7 @@ namespace swap\utils;
 class AllUtil
 {
     /**
-     * @return \swap\linker\App
+     * @return \swap\core\App
      * @author LCF
      * @date
      */

@@ -12,7 +12,7 @@ namespace swap\utils;
 class Helper
 {
     /**
-     * @var \swap\linker\App
+     * @var \swap\core\App
      */
     private static $app;
 
@@ -20,7 +20,7 @@ class Helper
     {
         if (!self::$app) {
             self::$app = \RegTree::get('app.application');
-            if (!(self::$app instanceof \swap\linker\App)) {
+            if (!(self::$app instanceof \swap\core\App)) {
                 trigger_error('获取不到 App 对象', E_USER_ERROR);
             }
         }

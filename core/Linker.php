@@ -4,7 +4,7 @@
  * @link https://github.com/lcfcode/linker
  */
 
-namespace swap\linker;
+namespace swap\core;
 
 class Linker
 {
@@ -36,6 +36,15 @@ class Linker
         $that['default.path'] = $config['root.path'] . DIRECTORY_SEPARATOR . $config['app.path'] . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR;
         $that['default.controller'] = $controller;
         $that['default.page'] = $action;
+        $all=['data' => $whole, 'views' => $that, 'set' => $set];
+
+
+
+
+
+
+
+
         return ['data' => $whole, 'views' => $that, 'set' => $set];
     }
 
@@ -48,7 +57,7 @@ class Linker
      * @date 2019/8/17 18:16
      * 页面数据的加工
      */
-    public function page($whole, $debugInfo)
+    public function page($whole)
     {
         $transfer = $whole['data'];
         $set = $whole['set'];
@@ -76,8 +85,6 @@ class Linker
         if (!is_file($content)) {
             throw new \RuntimeException($content . ':view is not found', 500);
         }
-        $v = $debugInfo['debug'] === true ? date('YmdHis') : date('YmdHis', filemtime($content));
-
         if ($set['head'] === true) {
             if (!is_file($layoutFile)) {
                 throw new \RuntimeException($layoutFile . ':view is not found', 500);
@@ -85,28 +92,8 @@ class Linker
         } else {
             $layoutFile = '';
         }
-        $pageObj = new Page($transfer, $content, $layoutFile, $v);
+        $pageObj = new Page($transfer, $content, $layoutFile);
         $pageObj->views($set['head']);
-        $this->debugs($debugInfo);
     }
 
-    /**
-     * @param $debugInfo
-     * @user LCF
-     * @date 2019/6/2 16:10
-     * 浏览器打印运行情况
-     */
-    private function debugs($debugInfo)
-    {
-        if ($debugInfo['debug'] === true) {
-            $startTime = $debugInfo['start_time'];
-            $startMemory = $debugInfo['start_memory'];
-            $endTime = microtime(true);
-            $endMemory = memory_get_usage();
-            $runTime = number_format(($endTime - $startTime), 8) . ' 秒';
-            $usedMemory = number_format((($endMemory - $startMemory) / 1024), 6) . ' KB';
-            $fileLoadNum = (string)count(get_included_files()) . ' 个';
-            echo "<script>console.group('run.info');console.info('运行时间:','{$runTime}');console.info('内存消耗:','{$usedMemory}');console.info('文件数量:','{$fileLoadNum}');console.groupEnd('debug.end');</script>";
-        }
-    }
 }

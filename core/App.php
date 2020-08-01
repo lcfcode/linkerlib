@@ -4,7 +4,7 @@
  * @link https://github.com/lcfcode/linker
  */
 
-namespace swap\linker;
+namespace swap\core;
 
 class App
 {
@@ -114,13 +114,12 @@ class App
      */
     public function run()
     {
-        $debugInfo = ['debug' => $this->config()['run.debug'], 'start_time' => $_SERVER['REQUEST_TIME_FLOAT'], 'start_memory' => memory_get_usage()];
         $linker = new Linker();
         //写入配置文件
         \RegTree::set('app.application', $this);
         $data = $linker->action($this->config());
         if ($data) {
-            $linker->page($data, $debugInfo);
+            $linker->page($data);
         }
     }
 

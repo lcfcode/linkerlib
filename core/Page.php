@@ -4,23 +4,21 @@
  * @link https://github.com/lcfcode/linker
  */
 
-namespace swap\linker;
+namespace swap\core;
 
 class Page
 {
     private $data;
     private $all;
-    private $version;
     private $_content;
     private $_layout;
 
-    public function __construct($transfer, $content = '', $layout = '', $version = 1)
+    public function __construct($transfer, $content = '', $layout = '')
     {
         $this->data = $transfer['data'];
         $this->all = $transfer;
         $this->_content = $content;
         $this->_layout = $layout;
-        $this->version = $version;
     }
 
     /**
@@ -68,27 +66,6 @@ class Page
             return $this->all;
         }
         return isset($this->all[$key]) ? $this->all[$key] : $default;
-    }
-
-    /**
-     * @return false|mixed|string
-     * @author LCF
-     * @date 2019/8/17 18:19
-     * 主要用于调试前端js和css版本控制的
-     */
-    public function v()
-    {
-        return $this->version;
-    }
-
-    /**
-     * @author LCF
-     * @date 2019/10/13 20:20
-     * 主要用于调试前端js和css版本控制的
-     */
-    public function v2()
-    {
-        echo $this->version;
     }
 
     public function api()

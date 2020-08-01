@@ -21,7 +21,7 @@ trait Utiltrait
     }
 
     /**
-     * @return \swap\linker\App
+     * @return \swap\core\App
      * @user LCF
      * @date 2019/3/15 22:27
      * Linker的实例
