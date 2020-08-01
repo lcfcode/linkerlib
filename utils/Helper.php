@@ -68,4 +68,19 @@ class Helper
         return self::getApp()->getUtils($name);
     }
 
+    /**
+     * @param $context
+     * @param null $content
+     * @param string $file
+     * @return bool|int
+     * @user LCF
+     * @date 2020/8/1 18:21
+     * 日志记录
+     */
+    public static function logs($context, $content = null, $file = '')
+    {
+        $file = $file ? $file : self::getApp()->config()['request.log.file'];
+        return self::utils()->log(self::getApp()->config()['run.logs.path'], $file, $context, $content);
+    }
+
 }
