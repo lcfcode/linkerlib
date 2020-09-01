@@ -29,6 +29,7 @@ class MssqlClass implements DbInterface
     private $_sqlParameter;
 
     private static $instances = [];
+    private static $instancesKey = '';
 
     /**
      * @param $config
@@ -38,12 +39,12 @@ class MssqlClass implements DbInterface
      */
     public static function getInstance($config)
     {
-        $ojbKey = $config['host'] . ':' . $config['port'] . ':' . $config['user'] . ':' . $config['database'];
-        if (isset(self::$instances[$ojbKey])) {
-            return self::$instances[$ojbKey];
+        self::$instancesKey = $config['host'] . ':' . $config['port'] . ':' . $config['user'] . ':' . $config['database'];
+        if (isset(self::$instances[self::$instancesKey])) {
+            return self::$instances[self::$instancesKey];
         }
-        self::$instances[$ojbKey] = new self($config);
-        return self::$instances[$ojbKey];
+        self::$instances[self::$instancesKey] = new self($config);
+        return self::$instances[self::$instancesKey];
     }
 
     public function __construct($config)
@@ -437,6 +438,9 @@ class MssqlClass implements DbInterface
             sqlsrv_close($this->_connect);
             $this->_connect = null;
         }
+        if (isset(self::$instances[self::$instancesKey])) {
+            unset(self::$instances[self::$instancesKey]);
+        }
     }
 
     private function clear()
@@ -546,7 +550,7 @@ class MssqlClass implements DbInterface
         return $returnData;
     }
 
-    function __destruct()
+    public function __destruct()
     {
         if ($this->_connect) {
             sqlsrv_close($this->_connect);

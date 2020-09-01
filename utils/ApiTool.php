@@ -40,8 +40,6 @@ class ApiTool
 
     public static function outJson($code, $msg, $data)
     {
-        //存在变量输出可以报notice
-        header('Content-Type:application/json;charset=UTF-8');
-        return json_encode(['code' => $code, 'msg' => $msg, 'data' => $data], JSON_UNESCAPED_UNICODE);
+        return ['code' => $code, 'msg' => $msg, 'data' => $data];
     }
 }

@@ -14,25 +14,15 @@ class App
     /**
      * Linker constructor.
      * @param string $env 全局配置文件
-     * @param null $bindApp
      */
-    public function __construct($env = 'dev', $bindApp = null)
+    public function __construct($env = 'dev')
     {
-        $config = [
-            'root.path' => \RegTree::root(),
-            'app.path' => 'app',
-            'run.env' => $env,
-            'global.config' => $this->globalConfig($env . '.php'),
-        ];
+        $config = $this->globalConfig($env . '.php');
+        $config['root.path'] = \RegTree::root();
+        $config['app.path'] = 'app';
         $config['run.debug'] = $env == 'dev' ? true : false;
-        $config['run.logs.path'] = $config['root.path'] . $config['global.config']['logs'];
-        $config['request.bind'] = $bindApp;
-
         $this->handleException($config);
-        $requestConf = $this->route($config['global.config']['default_route'], $bindApp);
-        $this->config = array_merge($config, $requestConf);
-        unset($config, $requestConf);
-        $this->run();
+        $this->config = $this->route($config);
     }
 
     /**
@@ -43,17 +33,8 @@ class App
      */
     private function handleException($config)
     {
-        if (true === $config['run.debug'] && isset($config['global.config']['err_obj']) && class_exists($config['global.config']['err_obj'])) {
-            $errClass = $config['global.config']['err_obj'];
-            $error = new $errClass();
-            if (!($error instanceof Error)) {
-                unset($error);
-                $error = new Error();
-            }
-        } else {
-            $error = new Error();
-        }
-        $error->init($config['run.logs.path']);
+        $error = new Error();
+        $error->init($config['logs']);
         $error->render($config['run.debug']);
     }
 
@@ -69,38 +50,24 @@ class App
     }
 
     /**
-     * @param $route
-     * @param $bindApp
+     * @param $config
      * @return array
      * @date 2019/8/17 18:13
      * 路由处理
      */
-    private function route($route, $bindApp)
+    private function route($config)
     {
         $requestUrl = $_SERVER['REQUEST_URI'];
         $index = strpos($requestUrl, '?');
         $uri = $index > 0 ? substr($requestUrl, 0, $index) : $requestUrl;
-        if (stripos($uri, 'index.php')) {
-            $uri = str_replace('index.php', '', $uri);
-        }
-        $uri = trim($uri, '/');
-        if (empty($uri)) {
-            $module = $route['module'];
-            $controller = $route['controller'];
-            $action = $route['action'];
-        } else {
-            $routeArr = explode('/', trim($uri, '/'));
-            if ($bindApp) {
-                $module = $bindApp;
-                $controller = isset($routeArr[0]) ? $routeArr[0] : $route['controller'];
-                $action = isset($routeArr[1]) ? $routeArr[1] : $route['action'];
-            } else {
-                $module = isset($routeArr[0]) ? $routeArr[0] : $route['module'];
-                $controller = isset($routeArr[1]) ? $routeArr[1] : $route['controller'];
-                $action = isset($routeArr[2]) ? $routeArr[2] : $route['action'];
-            }
-        }
+        $route = $config['default_route'];
+        $routeArr = $uri ? explode('/', trim($uri, '/')) : [];
+        $module = isset($routeArr[0]) && !empty($routeArr[0]) ? $routeArr[0] : $route['module'];
+        $controller = isset($routeArr[1]) ? $routeArr[1] : $route['controller'];
+        $action = isset($routeArr[2]) ? $routeArr[2] : $route['action'];
+
         $controller = ucfirst($controller);//请求重第一个字母为小写将它转为大写，类文件默认大写开头
+        $config['request.url'] = '/' . $module . '/' . $controller . '/' . $action;
         $config['request.module'] = $module;
         $config['request.log.file'] = $module . '-' . $controller . '-' . $action;
         $config['request.route'] = ['module' => $module, 'controller' => $controller, 'action' => $action];
@@ -114,12 +81,12 @@ class App
      */
     public function run()
     {
-        $linker = new Linker();
-        //写入配置文件
-        \RegTree::set('app.application', $this);
-        $data = $linker->action($this->config());
-        if ($data) {
-            $linker->page($data);
+        $html = $this->action($this->config());
+        if (is_string($html)) {
+            echo $html;
+        } else {
+            header('Content-Type:application/json;charset=UTF-8');
+            echo json_encode($html, JSON_UNESCAPED_UNICODE);
         }
     }
 
@@ -159,18 +126,18 @@ class App
      * @date 2019/8/17 18:22
      * 返回工具类的实例
      */
-    public function getUtils($name)
+    public function getUtils($name = 'AllUtil')
     {
         $class = 'swap\\utils\\' . ucwords($name);
         if (isset($this->objects[$class])) {
             return $this->objects[$class];
         }
-        $this->objects[$class] = new $class();
+        $this->objects[$class] = new $class($this);
         return $this->objects[$class];
     }
 
     /**
-     * @return array|bool
+     * @return array
      * @user LCF
      * @date 2019/5/23 21:36
      * 获取模块配置文件
@@ -180,10 +147,10 @@ class App
         $config = $this->config();
         $module = $config['request.module'];
         $app = $config['app.path'];
-        if (!isset($config['global.config']['module_file'])) {
+        if (!isset($config['module_file'])) {
             return [];
         }
-        $moduleConfig = $config['global.config']['module_file'];
+        $moduleConfig = $config['module_file'];
         $key = 'run.config.' . $module . $app . $moduleConfig;
         if (isset($this->objects[$key])) {
             return $this->objects[$key];
@@ -191,9 +158,10 @@ class App
         $moduleFile = $config['root.path'] . DIRECTORY_SEPARATOR . $app . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . $moduleConfig;
         if (is_file($moduleFile)) {
             $this->objects[$key] = require $moduleFile;
-            return $this->objects[$key];
+        } else {
+            $this->objects[$key] = [];
         }
-        return trigger_error($module . ' module no file module.config [' . $moduleConfig . '] ', E_USER_ERROR);
+        return $this->objects[$key];
     }
 
     /**
@@ -212,19 +180,108 @@ class App
         try {
             $path = \RegTree::root() . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
             if (is_file($path . $configFile)) {
-                $config = $conf = require $path . $configFile;
-                if (isset($conf['multi_profile']) && is_file($path . $conf['multi_profile'])) {
-                    $profile = require $path . $conf['multi_profile'];
-                    $config = array_merge($config, $profile);
-                    unset($profile);
-                }
-                unset($conf);
-                $this->objects[$key] = $config;
+                $this->objects[$key] = require $path . $configFile;;
                 return $this->objects[$key];
             }
             exit('no file global.config [' . $configFile . ']');
         } catch (\Exception $e) {
             exit('no file global.config [' . $configFile . '] ,exception!');
         }
+    }
+
+    /**
+     * @param $config
+     * @return array|string|null
+     * @author LCF
+     * @date 2019/8/17 18:15
+     * 执行模块文件函数反回数据方法
+     */
+    private function action($config)
+    {
+        $module = $config['request.route']['module'];
+        $controller = $config['request.route']['controller'];
+        $action = $config['request.route']['action'];
+        $className = $config['app.path'] . '\\' . $module . '\\controller\\' . $controller . 'Controller';
+        $functionName = $action . 'Action';
+        $moduleObj = new $className($this);
+        $before = $moduleObj->beforeRequest();
+        if ($before instanceof ResponseHandler) {
+            return $before->get();
+        }
+
+        $context = $moduleObj->$functionName();
+        if (!($context instanceof View)) {
+            return $context;
+        }
+        $transfer['before'] = $before;
+        $transfer['after'] = $moduleObj->afterRequest();
+        $data = $context->get();
+        $transfer['data'] = $data['data.volume.data'];
+        $set = $data['data.volume.set'];
+        $views['default.path'] = $config['root.path'] . DIRECTORY_SEPARATOR . $config['app.path'] . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR;
+        $views['default.controller'] = $controller;
+        $views['default.page'] = $action;
+
+        if ($set['api'] === true) {
+            return $transfer['data'];
+        }
+        $layoutFile = $views['default.path'] . 'Layout' . DIRECTORY_SEPARATOR . 'layout.phtml';
+        if ($set['layout'] !== null) {
+            $layoutFile = $views['default.path'] . 'Layout' . DIRECTORY_SEPARATOR . $set['layout'] . '.phtml';
+        }
+        //请求大小写规则跟url规则方法名一样
+        $path = $views['default.path'] . $views['default.controller'];
+        if ($set['controller'] !== null) {
+            $path = $views['default.path'] . $set['controller'];
+        }
+        if ($set['page'] !== null) {
+            $page = $set['page'];
+        } else {
+            $page = $views['default.page'];
+        }
+        $content = $path . DIRECTORY_SEPARATOR . $page . '.phtml';
+        if (!is_file($content)) {
+            throw new \RuntimeException($content . ':view is not found', 500);
+        }
+        if ($set['head'] === true) {
+            if (!is_file($layoutFile)) {
+                throw new \RuntimeException($layoutFile . ':view is not found', 500);
+            }
+        } else {
+            $layoutFile = '';
+        }
+        $pageObj = new Page($this, $transfer, $content, $layoutFile);
+        return $pageObj->views($set['head']);
+    }
+
+    public function configAll($configKey = null, $default = null)
+    {
+        $config = $this->getModuleConfig();
+        if (isset($config[$configKey])) {
+            return $config[$configKey];
+        }
+        $configs = $this->config();
+        if (isset($configs[$configKey])) {
+            return $configs[$configKey];
+        }
+        if (true === $configKey) {
+            return [
+                'global.config' => $configs,
+                'module.config' => $config,
+            ];
+        }
+        if (empty($configKey)) {
+            return array_merge($configs, $config);
+        }
+        return $default;
+    }
+
+    public function instance($class, ...$args)
+    {
+        if (isset($this->objects[$class])) {
+            return $this->objects[$class];
+        }
+        $this->objects[$class] = new $class(...$args);
+        return $this->objects[$class];
     }
 }

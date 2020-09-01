@@ -17,18 +17,7 @@ trait Utiltrait
      */
     public function utils($name = 'AllUtil')
     {
-        return $this->app()->getUtils($name);
-    }
-
-    /**
-     * @return \swap\core\App
-     * @user LCF
-     * @date 2019/3/15 22:27
-     * Linker的实例
-     */
-    public function app()
-    {
-        return \RegTree::get('app.application');
+        return $this->app->getUtils($name);
     }
 
     /**
@@ -39,7 +28,7 @@ trait Utiltrait
      */
     public function config()
     {
-        return $this->app()->config();
+        return $this->app->config();
     }
 
     /**

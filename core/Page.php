@@ -12,9 +12,11 @@ class Page
     private $all;
     private $_content;
     private $_layout;
+    private $app;
 
-    public function __construct($transfer, $content = '', $layout = '')
+    public function __construct(App $app, $transfer, $content = '', $layout = '')
     {
+        $this->app = $app;
         $this->data = $transfer['data'];
         $this->all = $transfer;
         $this->_content = $content;
@@ -22,18 +24,19 @@ class Page
     }
 
     /**
-     * @param $_content
-     * @param string $layout
      * @param bool $flag
+     * @return false|string
      * @author LCF
      * @date
-     * 处理页面的
      */
     public function views($flag = true)
     {
         $data = $this->data;
         $all = $this->all;
+        ob_start();
+        ob_implicit_flush(0);
         $flag === true ? require $this->_layout : require $this->_content;
+        return ob_get_clean();
     }
 
     /**
@@ -68,9 +71,23 @@ class Page
         return isset($this->all[$key]) ? $this->all[$key] : $default;
     }
 
-    public function api()
+    /**
+     * @param null $action
+     * @param null $controller
+     * @return string
+     * @author LCF
+     * 获取url
+     */
+    public function url($action = null, $controller = null)
     {
-        header('Content-Type:application/json;charset=UTF-8');
-        echo json_encode($this->data, JSON_UNESCAPED_UNICODE);
+        $config = $this->app->config()['request.route'];
+        $module = $config['module'];
+        if (empty($action)) {
+            $action = $config['action'];
+        }
+        if (empty($controller)) {
+            $controller = $config['controller'];
+        }
+        return '/' . $module . '/' . $controller . '/' . $action;
     }
 }

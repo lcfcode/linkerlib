@@ -14,20 +14,31 @@ class Db
 
     private $writeClient;
     private $readClient;
+    private $app;
 
     private static $instance;
 
     /**
+     * @param App $app
      * @return Db
      * @author LCF
      * @date
      */
-    public static function instance()
+    public static function instance(App $app)
     {
         if (empty(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = new self($app);
         }
         return self::$instance;
+    }
+
+
+    /**
+     * @param $app
+     */
+    public function __construct(App $app)
+    {
+        $this->app = $app;
     }
 
     /**
@@ -38,15 +49,13 @@ class Db
      */
     public function connect($dbKey = 'db')
     {
-        $application = \RegTree::get('app.application');
-//        $application = \swap\utils\Helper::getApp();
-        $config = $application->config()['global.config'][$dbKey];
+        $config = $this->app->config()[$dbKey];
         $separate = isset($config['separate']) ? $config['separate'] : false;
         if (true === $separate) {
-            $this->readClient = $application->dbInstance($config['read_db'], 'linker_read');
-            $this->writeClient = $application->dbInstance($config);
+            $this->readClient = $this->app->dbInstance($config['read_db'], 'linker_read');
+            $this->writeClient = $this->app->dbInstance($config);
         } else {
-            $this->readClient = $this->writeClient = $application->dbInstance($config);
+            $this->readClient = $this->writeClient = $this->app->dbInstance($config);
         }
         $this->connectDb = $dbKey;
         return $this;

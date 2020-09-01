@@ -8,14 +8,14 @@ namespace swap\utils;
 
 class AllUtil
 {
+    private $app;
+
     /**
-     * @return \swap\core\App
-     * @author LCF
-     * @date
+     * @param $app
      */
-    public function app()
+    public function __construct(\swap\core\App $app)
     {
-        return \RegTree::get('app.application');
+        $this->app = $app;
     }
 
     /**
@@ -26,7 +26,7 @@ class AllUtil
      */
     public function config()
     {
-        return $this->app()->config();
+        return $this->app->config();
     }
 
     /**
@@ -39,11 +39,11 @@ class AllUtil
      */
     public function getConfigValue($configKey, $default = null)
     {
-        $config = $this->app()->getModuleConfig();
+        $config = $this->app->getModuleConfig();
         if (isset($config[$configKey])) {
             return $config[$configKey];
         }
-        $globalConfig = $this->config()['global.config'];
+        $globalConfig = $this->config();
         if ($globalConfig[$configKey]) {
             return $globalConfig[$configKey];
         }
@@ -101,7 +101,7 @@ class AllUtil
     public function logs($context, $content = null, $file = '')
     {
         $file = $file ? $file : $this->config()['request.log.file'];
-        return $this->log($this->config()['run.logs.path'], $file, $context, $content);
+        return $this->log($this->config()['logs'], $file, $context, $content);
     }
 
     /**
@@ -122,7 +122,7 @@ class AllUtil
             '异常信息' => $e->getMessage(),
             '异常数组' => $e->getTrace(),
         ];
-        return $this->log($this->config()['run.logs.path'], $file, $log);
+        return $this->log($this->config()['logs'], $file, $log);
     }
 
     /**
@@ -137,7 +137,7 @@ class AllUtil
         if (empty($config)) {
             $config = $this->config()['global.config']['redis'];
         }
-        return $this->app()->getUtils('RedisClass')->connect($config);
+        return $this->app->getUtils('RedisClass')->connect($config);
     }
 
     /**
@@ -312,18 +312,6 @@ class AllUtil
             trigger_error('日志目录没有写入文件权限', E_USER_ERROR);
         }
         return $put;
-    }
-
-    /**
-     * @param null $content
-     * @user LCF
-     * @date 2019/3/13 14:31
-     * 打印信息到浏览器console栏
-     */
-    public function console($content)
-    {
-        $content = json_encode($content, JSON_UNESCAPED_UNICODE);
-        echo "<script>console.group('debug.info');console.info({$content});console.groupEnd();</script>";
     }
 
     /**
@@ -523,7 +511,7 @@ class AllUtil
      */
     public function isPost()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if (strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
             return true;
         }
         return false;

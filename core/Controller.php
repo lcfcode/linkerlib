@@ -6,11 +6,20 @@
 
 namespace swap\core;
 
-use swap\utils\ApiTool;
-
 abstract class Controller
 {
     use Utiltrait;
+
+    protected $app;
+
+    /**
+     * @param $app
+     */
+    public function __construct(App $app)
+    {
+        $this->app = $app;
+    }
+
 
     /**
      * @param $key
@@ -101,12 +110,12 @@ abstract class Controller
      * @param $code
      * @param string $msg
      * @param array $data
-     * @return false|string
+     * @return array|string
      * @author LCF
      * @date 2020/1/10 11:39
      */
     public function msg($code, $msg = '', $data = [])
     {
-        return ApiTool::msg($code, $msg, $data);
+        return ['code' => $code, 'msg' => $msg, 'data' => $data];
     }
 }

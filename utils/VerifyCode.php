@@ -88,12 +88,9 @@ class VerifyCode
             imagestring($img, 5, $charX, $charY, $code[$i], $colorArr[mt_rand(0, $pointNum - 1)]);
         }
         ob_clean();
-        header('Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate');
-        header('Cache-Control: post-check=0, pre-check=0', false);
-        header('Pragma: no-cache');
-        header("Content-type:image/png;");
         imagepng($img);
+        $content = ob_get_clean();
         imagedestroy($img);
-        return;
+        return $content;
     }
 }

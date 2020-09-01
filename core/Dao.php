@@ -14,6 +14,16 @@ abstract class Dao
 
     private $writeClient;
     private $readClient;
+    private $app;
+
+    /**
+     * @param $app
+     */
+    public function __construct(App $app)
+    {
+        $this->app = $app;
+    }
+
 
     /**
      * @return string
@@ -75,14 +85,13 @@ abstract class Dao
      */
     private function connect($flag = true)
     {
-        $application = \RegTree::get('app.application');
-        $config = $application->config()['global.config'][$this->setConnect()];
+        $config = $this->app->config()[$this->setConnect()];
         $separate = isset($config['separate']) ? $config['separate'] : false;
         if (true === $separate) {
-            $this->readClient = $application->dbInstance($config['read_db'], 'linker_read');
-            $this->writeClient = $application->dbInstance($config);
+            $this->readClient = $this->app->dbInstance($config['read_db'], 'linker_read');
+            $this->writeClient = $this->app->dbInstance($config);
         } else {
-            $this->readClient = $this->writeClient = $application->dbInstance($config);
+            $this->readClient = $this->writeClient = $this->app->dbInstance($config);
         }
         return $flag ? $this->readClient : $this->writeClient;
     }
