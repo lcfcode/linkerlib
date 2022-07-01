@@ -1,7 +1,7 @@
 {
   "name": "lcfdev/linkerlib",
-  "description": "主要用于学习。注：授权协议没看过，随便写的一个",
-  "license": "Apache-2.0",
+  "description": "linker的库文件，主要是方便依赖composer更新",
+  "license": "LGPL-2.1",
   "type": "linkerlib",
   "authors": [
     {
@@ -12,6 +12,6 @@
   "minimum-stability": "dev",
   "require": {
     "lcfdev/linkerlib-install": "dev-master",
-    "php": ">=7.0"
+    "php": ">=7.3"
   }
 }
