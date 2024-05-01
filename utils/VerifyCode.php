@@ -82,7 +82,7 @@ class VerifyCode
         }
 
         for ($i = 0; $i < $length; $i++) {
-            $yRand = (int)$height / 3;
+            $yRand = intval($height / 3);
             $charX = (($i * $width) / $length) + mt_rand(($length - $i), $yRand);
             $charY = mt_rand($yRand, $yRand + $length);
             imagestring($img, 5, $charX, $charY, $code[$i], $colorArr[mt_rand(0, $pointNum - 1)]);
