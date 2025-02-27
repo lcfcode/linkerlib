@@ -49,7 +49,7 @@ class ThatTool
             if (!empty($suffix)) {
                 $len = strlen($suffix);
                 $tmp = substr($file, -1 * $len);
-                $isFile = is_file($newFile) && $tmp == $suffix;
+                $isFile = is_file($newFile) && strtolower($tmp) == strtolower($suffix);
             }
             if ($isFile) {
                 $arr[] = $newFile;
