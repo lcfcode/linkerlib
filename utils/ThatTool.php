@@ -26,8 +26,8 @@ class ThatTool
             $isFile = is_file($newFile);
             if (!empty($suffix)) {
                 $len = strlen($suffix);
-                $tmpSuffix = substr($file, -1 * $len);
-                $isFile = is_file($newFile) && strtolower($tmpSuffix) == strtolower($suffix);
+                $tmpFix = substr($file, -1 * $len);
+                $isFile = is_file($newFile) && strtolower($tmpFix) == strtolower($suffix);
             }
             if ($isFile) {
                 $arr[$file] = $newFile;
