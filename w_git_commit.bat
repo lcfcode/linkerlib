@@ -10,6 +10,6 @@ cd %codePath%
 git pull
 git add .
 git commit -m "bat_commit: %dateVar%%timeVar%"
-git push 
-
+git push origin master
+git push gitee master
 ::pause
