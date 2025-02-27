@@ -1,0 +1,16 @@
+{
+  "name": "lcfdev/linkerlib",
+  "description": "linker的库文件，主要是方便依赖composer更新",
+  "license": "LGPL-2.1",
+  "type": "linkerlib",
+  "minimum-stability": "dev",
+  "require": {
+    "lcfdev/linkerlib-install": "dev-master",
+    "php": ">=8.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "lcfdev/linkerlib-install": true
+    }
+  }
+}
